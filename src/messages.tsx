@@ -90,6 +90,11 @@ export default function Command() {
                           text="Click Url"
                         />
                       )}
+                      {Object.entries(message.extras)
+                        .filter(([k]) => !["metadata::type", "client::notification"].includes(k))
+                        .map(([k, v]) => (
+                          <List.Item.Detail.Metadata.Label key={k} title={k} text={JSON.stringify(v)} />
+                        ))}
                     </>
                   )}
                 </List.Item.Detail.Metadata>
@@ -104,6 +109,7 @@ export default function Command() {
                 icon={Icon.Trash}
                 onAction={() => deleteMessage(message.id)}
                 style={Action.Style.Destructive}
+                shortcut={Shortcut.Common.Remove}
               />
               <Action
                 title={"Refresh"}
