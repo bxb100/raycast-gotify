@@ -9,7 +9,20 @@ export const Message = z.object({
   title: z.string(),
   priority: z.number(),
   date: z.string().datetime(),
-  extras: z.any().optional(),
+  extras: z
+    .object({
+      "metadata::type": z.string(),
+      "client::notification": z
+        .object({
+          click: z.object({
+            url: z.string(),
+          }),
+          bigImageUrl: z.string(),
+        })
+        .partial(),
+    })
+    .partial()
+    .optional(),
 });
 
 export const MessageRes = z.object({

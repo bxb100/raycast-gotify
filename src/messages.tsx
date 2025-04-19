@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useApplication } from "./hooks/useApplication";
 import { useMessage } from "./hooks/useMessage";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useCallback, useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
+import Shortcut = Keyboard.Shortcut;
 
 dayjs.extend(relativeTime);
 
@@ -46,7 +47,12 @@ export default function Command() {
       }
       actions={
         <ActionPanel>
-          <Action title={"Refresh"} icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
+          <Action
+            title={"Refresh"}
+            icon={Icon.ArrowClockwise}
+            onAction={() => revalidate()}
+            shortcut={Shortcut.Common.Refresh}
+          />
         </ActionPanel>
       }
     >
@@ -55,13 +61,37 @@ export default function Command() {
           icon={"apple-touch-icon-60x60.png"}
           key={message.id}
           title={message.title}
+          keywords={[message.message, message.title, String(message.extras?.["metadata::type"])]}
           detail={
             <List.Item.Detail
-              markdown={message.message}
+              markdown={
+                message.extras?.["client::notification"]?.bigImageUrl
+                  ? message.message + `\n\n![notification image](${message.extras["client::notification"].bigImageUrl})`
+                  : message.message
+              }
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="from" text={getAppName(message.appid)} />
-                  <List.Item.Detail.Metadata.Label title="date" text={dayjs(message.date).fromNow(true) + " ago"} />
+                  <List.Item.Detail.Metadata.Label title="From" text={getAppName(message.appid)} />
+                  <List.Item.Detail.Metadata.Label title="Date" text={dayjs(message.date).fromNow(true) + " ago"} />
+                  {message.extras && (
+                    <>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label title="Extras" />
+                      {message.extras["metadata::type"] && (
+                        <List.Item.Detail.Metadata.Label
+                          title="metadata::type"
+                          text={message.extras["metadata::type"]}
+                        />
+                      )}
+                      {message.extras["client::notification"]?.click?.url && (
+                        <List.Item.Detail.Metadata.Link
+                          title="client::notification"
+                          target={message.extras["client::notification"].click.url}
+                          text="Click Url"
+                        />
+                      )}
+                    </>
+                  )}
                 </List.Item.Detail.Metadata>
               }
             />
@@ -74,6 +104,12 @@ export default function Command() {
                 icon={Icon.Trash}
                 onAction={() => deleteMessage(message.id)}
                 style={Action.Style.Destructive}
+              />
+              <Action
+                title={"Refresh"}
+                icon={Icon.ArrowClockwise}
+                onAction={() => revalidate()}
+                shortcut={Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
