@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { z } from "zod";
+import { buildEndpoint } from "../utils";
 
 export const Applications = z.array(
   z.object({
@@ -16,9 +17,11 @@ export const Applications = z.array(
 );
 
 export function useApplication() {
-  const { token, endpoint } = getPreferenceValues<Preferences.Messages>();
+  const { token } = getPreferenceValues<Preferences.Messages>();
 
-  const { data, isLoading } = useFetch<z.infer<typeof Applications>>(`${endpoint}/application`, {
+  const url = buildEndpoint("/application");
+
+  const { data, isLoading } = useFetch<z.infer<typeof Applications>>(url.href, {
     headers: {
       "X-Gotify-Key": token,
     },

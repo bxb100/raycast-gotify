@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { z } from "zod";
-import { authHeaders, endpointWithPath } from "../utils";
+import { authHeaders, buildEndpoint } from "../utils";
 import { useStream } from "./useStream";
 import { useEffect, useState } from "react";
 
@@ -57,10 +57,10 @@ export const MessageRes = z.object({
 });
 
 export function useMessage(props?: { id: string }) {
-  const { token, endpoint } = getPreferenceValues<Preferences.Messages>();
-  let url = endpointWithPath(endpoint, "/message");
+  const { token } = getPreferenceValues<Preferences.Messages>();
+  let url = buildEndpoint("/message");
   if (props?.id && props.id.toLowerCase() !== "all") {
-    url = endpointWithPath(url, `/application/${props.id}/message`);
+    url = buildEndpoint(`/application/${props.id}/message`);
   }
 
   const { data, isLoading, pagination, mutate, revalidate } = useFetch<
@@ -87,7 +87,7 @@ export function useMessage(props?: { id: string }) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Delete Message" });
     try {
       await mutate(
-        fetch(endpointWithPath(endpoint, `/message/${id}`), {
+        fetch(buildEndpoint(`/message/${id}`), {
           ...authHeaders(token),
           method: "DELETE",
         }),
@@ -109,7 +109,7 @@ export function useMessage(props?: { id: string }) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Delete All" });
     try {
       await mutate(
-        fetch(endpointWithPath(endpoint, path), {
+        fetch(buildEndpoint(path), {
           ...authHeaders(token),
           method: "DELETE",
         }),

@@ -3,12 +3,12 @@ import WebSocket from "ws";
 import { z } from "zod";
 import { Message } from "./useMessage";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { authHeaders, endpointWithPath, websocketEndpoint } from "../utils";
+import { authHeaders, buildEndpoint } from "../utils";
 import { showFailureToast } from "@raycast/utils";
 import Style = Toast.Style;
 
 export function useStream() {
-  const { token, endpoint } = getPreferenceValues<Preferences.Messages>();
+  const { token } = getPreferenceValues<Preferences.Messages>();
   const [data, setData] = useState<z.infer<typeof Message> | undefined>();
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -17,7 +17,7 @@ export function useStream() {
       // 0: CONNECTING, 1: OPEN
       socketRef.current.close();
     }
-    const socket = new WebSocket(endpointWithPath(websocketEndpoint(endpoint), "/stream"), {
+    const socket = new WebSocket(buildEndpoint("/stream", true), {
       ...authHeaders(token),
     });
     socketRef.current = socket;
